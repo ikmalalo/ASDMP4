@@ -1,22 +1,5 @@
 from prettytable import PrettyTable
 
-class QueueLL:
-    def __init__(self):
-        self.items = []
-
-    def is_empty(self):
-        return self.items == []
-
-    def enqueue(self, item):
-        self.items.insert(0, item)
-
-    def dequeue(self):
-        if not self.is_empty():
-            return self.items.pop()
-
-    def size(self):
-        return len(self.items)
-
 class CircularNode:
     def __init__(self, robux):
         self.robux = robux
@@ -283,8 +266,7 @@ class CRUD:
 class TopUp:
     def __init__(self, daftar_robux):
         self.daftar_robux = daftar_robux
-        self.transactions = QueueLL()
-        
+
     def lihat_robux(self):
         if not self.daftar_robux:
             print("Daftar Robux tidak ada")
@@ -320,18 +302,6 @@ class TopUp:
                 print("Maaf E-Money Anda tidak Cukup")
         else:
             print(f"Kode {kode_robux} Robux Yang Anda Masukkan Salah!")
-            
-        transaksi_baru = {"Player": player.nama, "Kode Robux": kode_robux, "Jumlah Robux": jumlah_robux}
-        self.transaksi.enqueue(transaksi_baru)
-        
-    def histori_transaksi(self):
-        if self.transaksi.is_empty():
-            print("transaksi kosong")
-        else:
-            print("histori transaksi: ")
-            for idx, transaksi in enumerate(self.transaksi.items, start=1):
-                print(f"{idx}. Player: {transaksi['Player']}, Kode Robux: {transaksi['Kode Robux']}, Jumlah Robux: {transaksi['Jumlah Robux']}")
-
 
     def menu_player(self, player):
         while True:
@@ -340,8 +310,7 @@ class TopUp:
             print("2. Beli Robux")
             print("3. Lihat Harga Robux Terkecil")
             print("4. Lihat Harga Robux Terbesar")
-            print("5. Lihat history pembelian anda")
-            print("6. Keluar")
+            print("5. Keluar")
 
             pilih = input("Pilih menu(1-3): ")
 
@@ -356,8 +325,6 @@ class TopUp:
             elif pilih == "4":
                 self.urutuan_robux(reverse=True)
             elif pilih == "5":
-                self.histori_transaksi()
-            elif pilih == "6":
                 break
 
 def menu_login():
