@@ -85,14 +85,14 @@ class CRUD:
             else:
                 return self.quicksort(kecil) + [arr[0]] + self.quicksort(besar)
 
-    def robuxfilterkode(self, hurufawal):
+    def robuxkodejumpsearch(self, hurufawal):
         if not self.daftar_robux:
-            print("DAta Robux tidak ada di tabel")
+            print("Data Robux tidak ada di tabel")
         else:
             kodefilter = [robux for robux in self.daftar_robux.values() if robux.kode.startswith(hurufawal.upper())]
 
             if not kodefilter:
-                print(f"kode huruf awal yang anda masukin tidak ada '{hurufawal}'")
+                print(f"Kode huruf awal yang Anda masukkan tidak ada '{hurufawal}'")
                 return
 
             urutrobux = sorted(kodefilter, key=lambda robux: robux.kode)
@@ -105,58 +105,22 @@ class CRUD:
                 persen = f"{robux.diskon}%"
                 table.add_row([idx, robux.kode, robux.paket_robux, robux.paket_subscription, rupiah, persen])
             print(table)
-        if not self.daftar_robux:
-            print("Data Robux tidak ada di tabel")
-        else:
-            def fibonacci_search(arr, x):
-                n = len(arr)
-                offset = -1
-                fibke2 = 0
-                fibke1 = 1
-                fib = fibke1 + fibke2
-                dapat_kode = []
 
-                while fib < n:
-                    fibke2 = fibke1
-                    fibke1 = fib
-                    fib = fibke1 + fibke2
-
-                while fib > 1:
-                    i = min(offset + fibke2, n - 1)
-
-                    if arr[i].kode.startswith(x.upper()):
-                        dapat_kode.append(i)
-
-                    if arr[i].kode < x.upper():
-                        fib = fibke1
-                        fibke1 = fibke2
-                        fibke2 = fib - fibke1
-                        offset = i
-
-                    else:
-                        fib = fibke2
-                        fibke1 -= fibke2
-                        fibke2 = fib - fibke1
-
-                if fibke1 and offset < n - 1 and arr[offset + 1].kode.startswith(x.upper()):
-                    dapat_kode.append(offset + 1)
-
-                return dapat_kode
-
-            urutan_robux = sorted(self.daftar_robux.values(), key=lambda robux: robux.kode)
-
-            indexkode = fibonacci_search(urutan_robux, hurufawal)
-            
-            if indexkode:
-                table = PrettyTable()
-                table.field_names = ["No", "Kode Robux", "Paket Robux", "Paket Subscription", "Harga", "Diskon"]
-                for i, idx in enumerate(indexkode, start=1):
-                    table.add_row([i, urutan_robux[idx].kode, urutan_robux[idx].paket_robux, urutan_robux[idx].paket_subscription, f"Rp.{urutan_robux[idx].harga}", f"{urutan_robux[idx].diskon}%"])
-                print(table)
-            else:
-                print(f"Kode huruf awal yang Anda masukkan tidak ada '{hurufawal}'")
-
-    
+            hurufawal = hurufawal.upper()
+            panjang_data_robux = len(urutrobux)
+            jumpsearch = int(panjang_data_robux ** 0.5)
+            cekindex = 0
+            while urutrobux[min(jumpsearch, panjang_data_robux) - 1].kode < hurufawal:
+                cekindex = jumpsearch
+                jumpsearch += int(panjang_data_robux ** 0.5)
+                if cekindex >= panjang_data_robux:
+                    print(f"Kode '{hurufawal}'yang di masukkan tidak ada")
+                    return
+            while urutrobux[cekindex].kode < hurufawal:
+                cekindex += 1
+                if cekindex == min(jumpsearch, panjang_data_robux):
+                    break
+        
     def tambahcircularlinkedlist(self, kode_robux):
         robux = self.daftar_robux.get(kode_robux)
         if robux:
@@ -233,7 +197,7 @@ class CRUD:
             print("4. Hapus Data Robux")
             print("5. Lihat Hagra Robux di tabel (Terkecil)")
             print("6. Lihat Harga Robux di tabel (Terbesar)")
-            print("7. Cari Robux di tabel dengan kode filter")
+            print("7. Cari Robux menggunakan jumpsearc dengan kode awal")
             print("8. Tambah Data robux tabel ke Circular Linked List")
             print("9. Lihat Circular Linked List")
             print("10. Keluar")
@@ -254,7 +218,7 @@ class CRUD:
                 self.urutan_robux(reverse=True)
             elif pilih == "7":
                 hurufawal = input("Masukkan huruf kode yang anda mau: ")
-                self.robuxfilterkode(hurufawal)
+                self.robuxkodejumpsearch(hurufawal)
             elif pilih == "8":
                 kode_robux = input("Masukkan Kode Robux dari tabel yang ingin ditambahkan ke Circular Linked List: ")
                 self.tambahcircularlinkedlist(kode_robux)
