@@ -1,5 +1,22 @@
 from prettytable import PrettyTable
 
+class QueueLL:
+    def __init__(self):
+        self.items = []
+
+    def is_empty(self):
+        return self.items == []
+
+    def enqueue(self, item):
+        self.items.insert(0, item)
+
+    def dequeue(self):
+        if not self.is_empty():
+            return self.items.pop()
+
+    def size(self):
+        return len(self.items)
+
 class CircularNode:
     def __init__(self, robux):
         self.robux = robux
@@ -85,14 +102,14 @@ class CRUD:
             else:
                 return self.quicksort(kecil) + [arr[0]] + self.quicksort(besar)
 
-    def robuxkodejumpsearch(self, hurufawal):
+    def robuxfilterkode(self, hurufawal):
         if not self.daftar_robux:
-            print("Data Robux tidak ada di tabel")
+            print("DAta Robux tidak ada di tabel")
         else:
             kodefilter = [robux for robux in self.daftar_robux.values() if robux.kode.startswith(hurufawal.upper())]
 
             if not kodefilter:
-                print(f"Kode huruf awal yang Anda masukkan tidak ada '{hurufawal}'")
+                print(f"kode huruf awal yang anda masukin tidak ada '{hurufawal}'")
                 return
 
             urutrobux = sorted(kodefilter, key=lambda robux: robux.kode)
@@ -105,22 +122,58 @@ class CRUD:
                 persen = f"{robux.diskon}%"
                 table.add_row([idx, robux.kode, robux.paket_robux, robux.paket_subscription, rupiah, persen])
             print(table)
+        if not self.daftar_robux:
+            print("Data Robux tidak ada di tabel")
+        else:
+            def fibonacci_search(arr, x):
+                n = len(arr)
+                offset = -1
+                fibke2 = 0
+                fibke1 = 1
+                fib = fibke1 + fibke2
+                dapat_kode = []
 
-            hurufawal = hurufawal.upper()
-            panjang_data_robux = len(urutrobux)
-            jumpsearch = int(panjang_data_robux ** 0.5)
-            cekindex = 0
-            while urutrobux[min(jumpsearch, panjang_data_robux) - 1].kode < hurufawal:
-                cekindex = jumpsearch
-                jumpsearch += int(panjang_data_robux ** 0.5)
-                if cekindex >= panjang_data_robux:
-                    print(f"Kode '{hurufawal}'yang di masukkan tidak ada")
-                    return
-            while urutrobux[cekindex].kode < hurufawal:
-                cekindex += 1
-                if cekindex == min(jumpsearch, panjang_data_robux):
-                    break
-        
+                while fib < n:
+                    fibke2 = fibke1
+                    fibke1 = fib
+                    fib = fibke1 + fibke2
+
+                while fib > 1:
+                    i = min(offset + fibke2, n - 1)
+
+                    if arr[i].kode.startswith(x.upper()):
+                        dapat_kode.append(i)
+
+                    if arr[i].kode < x.upper():
+                        fib = fibke1
+                        fibke1 = fibke2
+                        fibke2 = fib - fibke1
+                        offset = i
+
+                    else:
+                        fib = fibke2
+                        fibke1 -= fibke2
+                        fibke2 = fib - fibke1
+
+                if fibke1 and offset < n - 1 and arr[offset + 1].kode.startswith(x.upper()):
+                    dapat_kode.append(offset + 1)
+
+                return dapat_kode
+
+            urutan_robux = sorted(self.daftar_robux.values(), key=lambda robux: robux.kode)
+
+            indexkode = fibonacci_search(urutan_robux, hurufawal)
+            
+            if indexkode:
+                table = PrettyTable()
+                table.field_names = ["No", "Kode Robux", "Paket Robux", "Paket Subscription", "Harga", "Diskon"]
+                for i, idx in enumerate(indexkode, start=1):
+                    table.add_row([i, urutan_robux[idx].kode, urutan_robux[idx].paket_robux, urutan_robux[idx].paket_subscription, f"Rp.{urutan_robux[idx].harga}", f"{urutan_robux[idx].diskon}%"])
+                print(table)
+            else:
+                print(f"Kode huruf awal yang Anda masukkan tidak ada '{hurufawal}'")
+
+    
     def tambahcircularlinkedlist(self, kode_robux):
         robux = self.daftar_robux.get(kode_robux)
         if robux:
@@ -197,7 +250,7 @@ class CRUD:
             print("4. Hapus Data Robux")
             print("5. Lihat Hagra Robux di tabel (Terkecil)")
             print("6. Lihat Harga Robux di tabel (Terbesar)")
-            print("7. Cari Robux menggunakan jumpsearc dengan kode awal")
+            print("7. Cari Robux di tabel dengan kode filter")
             print("8. Tambah Data robux tabel ke Circular Linked List")
             print("9. Lihat Circular Linked List")
             print("10. Keluar")
@@ -218,7 +271,7 @@ class CRUD:
                 self.urutan_robux(reverse=True)
             elif pilih == "7":
                 hurufawal = input("Masukkan huruf kode yang anda mau: ")
-                self.robuxkodejumpsearch(hurufawal)
+                self.robuxfilterkode(hurufawal)
             elif pilih == "8":
                 kode_robux = input("Masukkan Kode Robux dari tabel yang ingin ditambahkan ke Circular Linked List: ")
                 self.tambahcircularlinkedlist(kode_robux)
@@ -230,7 +283,8 @@ class CRUD:
 class TopUp:
     def __init__(self, daftar_robux):
         self.daftar_robux = daftar_robux
-
+        self.transactions = QueueLL()
+        
     def lihat_robux(self):
         if not self.daftar_robux:
             print("Daftar Robux tidak ada")
@@ -266,6 +320,18 @@ class TopUp:
                 print("Maaf E-Money Anda tidak Cukup")
         else:
             print(f"Kode {kode_robux} Robux Yang Anda Masukkan Salah!")
+            
+        transaksi_baru = {"Player": player.nama, "Kode Robux": kode_robux, "Jumlah Robux": jumlah_robux}
+        self.transaksi.enqueue(transaksi_baru)
+        
+    def histori_transaksi(self):
+        if self.transaksi.is_empty():
+            print("transaksi kosong")
+        else:
+            print("histori transaksi: ")
+            for idx, transaksi in enumerate(self.transaksi.items, start=1):
+                print(f"{idx}. Player: {transaksi['Player']}, Kode Robux: {transaksi['Kode Robux']}, Jumlah Robux: {transaksi['Jumlah Robux']}")
+
 
     def menu_player(self, player):
         while True:
@@ -274,7 +340,8 @@ class TopUp:
             print("2. Beli Robux")
             print("3. Lihat Harga Robux Terkecil")
             print("4. Lihat Harga Robux Terbesar")
-            print("5. Keluar")
+            print("5. Lihat history pembelian anda")
+            print("6. Keluar")
 
             pilih = input("Pilih menu(1-3): ")
 
@@ -289,6 +356,8 @@ class TopUp:
             elif pilih == "4":
                 self.urutuan_robux(reverse=True)
             elif pilih == "5":
+                self.histori_transaksi()
+            elif pilih == "6":
                 break
 
 def menu_login():
